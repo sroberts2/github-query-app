@@ -14,6 +14,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
@@ -177,7 +181,7 @@ public class GitHubApiController {
             Element properties = (Element) propertiesList.item(0);
 
             // Find the spring boot version
-            String springBootVersion = getProperty(properties, "spring.boot.version");
+            String springBootVersion = getProperty(properties, "spring-boot.version");
             if (springBootVersion == null) {
                 springBootVersion = getProperty(properties, "spring.boot.version");
             }
@@ -185,17 +189,32 @@ public class GitHubApiController {
                 springBootVersion = getProperty(properties, "spring-boot-dependencies.version");
             }
             if (springBootVersion == null) {
+                springBootVersion = getProperty(properties, "version.spring.boot");
+            }
+            if (springBootVersion == null){
+                springBootVersion = getProperty(properties, "spring-framework.version");
+                if (springBootVersion == null) {
+                  springBootVersion = getProperty(properties, "spring.framework.version");
+                }
+                if (springBootVersion != null){
+                    springBootVersion = "Uses native Spring version "+springBootVersion;
+                }
+            }
+
+            if (springBootVersion == null) {
                 NodeList parentList = root.getElementsByTagName("parent");
-                Element parents = (Element) parentList.item(0);
-                String artifactId = getProperty(parents, "artifactId");
+                Element parent = (Element) parentList.item(0);
+                String artifactId = getProperty(parent, "artifactId");
                 if (artifactId != null && artifactId.equals("spring-boot-starter-parent")) {
-                    springBootVersion = getProperty(parents, "version");;
+                    springBootVersion = getProperty(parent, "version");
+                } else if (artifactId != null && artifactId.equals("companies-house-parent")) {
+                    springBootVersion = "Uses companies-house-parent pom, no Spring version detected";
                 } else if(artifactId != null){
                     springBootVersion = "Uses parent pom of "+artifactId;
                 }
             }
             if (springBootVersion == null){
-                springBootVersion = "Unknown";
+                springBootVersion = "No Spring detected";
             }
             return springBootVersion;
         } catch (Exception e) {
