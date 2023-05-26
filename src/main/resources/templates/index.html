@@ -33,11 +33,67 @@
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+
+       .search-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .search-container label {
+            display: inline-block;
+            width: 200px;
+            text-align: right;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .search-container input[type="text"] {
+            width: 300px;
+            padding: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
     </style>
+    <script>
+    function filterTable() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("dataTable");
+        tr = table.getElementsByTagName("tr");
+
+        for (i = 0; i < tr.length; i++) {
+            var found = false;
+            td = tr[i].getElementsByTagName("td");
+
+            for (var j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (found) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+</script>
 </head>
 <body>
 <div align="center"><h1>CH Dependency Tracker</h1></div>
-<table>
+<div class="search-container">
+    <label for="searchInput">Enter search term here:</label>
+    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Enter Search Term">
+</div>
+<table id="dataTable">
     <thead>
     <tr>
         <th>Repository Name</th>
