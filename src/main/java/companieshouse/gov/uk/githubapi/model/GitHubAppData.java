@@ -6,11 +6,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class GitHubAppData {
     @Id
-    //private String id;
     private String name;
     private String springbootversion;
 
-
+    public String getId() {
+        return name;
+    }
     public String getName() {
         return name;
     }
@@ -19,7 +20,7 @@ public class GitHubAppData {
         this.name = name;
     }
 
-    public String getSpringbootversion() {
+    public String getSpringBootVersion() {
         return springbootversion;
     }
 

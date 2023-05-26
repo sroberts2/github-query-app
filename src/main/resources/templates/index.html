@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>GitHub App Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+<div align="center"><h1>CH Dependency Tracker</h1></div>
+<table>
+    <thead>
+    <tr>
+        <th>Repository Name</th>
+        <th>Spring Boot Version</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="appData : ${appDataList}">
+        <td th:text="${appData.name}"></td>
+        <td th:text="${appData.springBootVersion}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

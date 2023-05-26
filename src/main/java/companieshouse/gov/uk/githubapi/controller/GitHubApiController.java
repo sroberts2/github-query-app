@@ -10,10 +10,7 @@ import companieshouse.gov.uk.githubapi.model.GitHubTree;
 import companieshouse.gov.uk.githubapi.model.GitHubTreeResponse;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,7 +37,10 @@ import org.xml.sax.InputSource;
 @RequestMapping
 public class GitHubApiController {
 
+    @Autowired
     private final GitHubRepositoryRepository gitHubRepositoryRepository;
+
+    @Autowired
     private final GitHubAppDataRepository gitHubAppDataRepository;
 
     private final RestTemplate restTemplate;
@@ -52,6 +52,15 @@ public class GitHubApiController {
         this.gitHubAppDataRepository = gitHubAppDataRepository;
         this.restTemplate = restTemplate;
     }
+
+    @GetMapping("/")
+    public String getGitHubAppData(Model model) {
+        List<GitHubAppData> appDataList = gitHubAppDataRepository.findAll();
+        appDataList.sort(Comparator.comparing(GitHubAppData::getId)); // Sort by id alphabetically
+        model.addAttribute("appDataList", appDataList);
+        return "index";
+    }
+
 
     @GetMapping("/get-data")
     public String getData(Model model)  {
