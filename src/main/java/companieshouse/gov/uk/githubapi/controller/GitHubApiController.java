@@ -1,6 +1,8 @@
 package companieshouse.gov.uk.githubapi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import companieshouse.gov.uk.githubapi.dao.GitHubAppDataRepository;
 import companieshouse.gov.uk.githubapi.dao.GitHubRepositoryRepository;
 import companieshouse.gov.uk.githubapi.model.GitHubAppData;
@@ -8,15 +10,14 @@ import companieshouse.gov.uk.githubapi.model.GitHubRepository;
 import companieshouse.gov.uk.githubapi.model.GitHubSearchResponse;
 import companieshouse.gov.uk.githubapi.model.GitHubTree;
 import companieshouse.gov.uk.githubapi.model.GitHubTreeResponse;
+import companieshouse.gov.uk.githubapi.model.SupportDate;
+import companieshouse.gov.uk.githubapi.service.SupportDateService;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
@@ -49,12 +49,18 @@ public class GitHubApiController {
 
     private final RestTemplate restTemplate;
 
+    private final ObjectMapper objectMapper;
+
+
+
     @Autowired
     public GitHubApiController(GitHubRepositoryRepository gitHubRepositoryRepository,
-            GitHubAppDataRepository gitHubAppDataRepository, RestTemplate restTemplate) {
+            GitHubAppDataRepository gitHubAppDataRepository, RestTemplate restTemplate,
+            ObjectMapper objectMapper) {
         this.gitHubRepositoryRepository = gitHubRepositoryRepository;
         this.gitHubAppDataRepository = gitHubAppDataRepository;
         this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping("/")
@@ -66,13 +72,8 @@ public class GitHubApiController {
     }
 
 
-    @GetMapping("/get-data")
-    public String getData(Model model)  {
-        List<GitHubAppData> list = gitHubAppDataRepository.findAll();
-        model.addAttribute("repoList", list);
-        return "repos";
-    }
 
+    //TODO cron instead of endpoint
     @GetMapping("/populate-repo-data")
     public ResponseEntity<String> getGitHubApiResponse() throws JsonProcessingException {
 
