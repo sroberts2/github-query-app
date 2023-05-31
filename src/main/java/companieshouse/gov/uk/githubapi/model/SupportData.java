@@ -1,6 +1,6 @@
 package companieshouse.gov.uk.githubapi.model;
 
-public class SupportDate {
+public class SupportData {
 
     private String cycle;
     private String supportedJavaVersions;
@@ -77,7 +77,7 @@ public class SupportDate {
 
     @Override
     public String toString() {
-        return "SupportDate{" +
+        return "SupportData{" +
                 "cycle='" + cycle + '\'' +
                 ", supportedJavaVersions='" + supportedJavaVersions + '\'' +
                 ", releaseDate='" + releaseDate + '\'' +

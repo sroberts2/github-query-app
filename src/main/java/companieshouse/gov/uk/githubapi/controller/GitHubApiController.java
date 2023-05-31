@@ -1,7 +1,6 @@
 package companieshouse.gov.uk.githubapi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import companieshouse.gov.uk.githubapi.dao.GitHubAppDataRepository;
 import companieshouse.gov.uk.githubapi.dao.GitHubRepositoryRepository;
@@ -10,8 +9,6 @@ import companieshouse.gov.uk.githubapi.model.GitHubRepository;
 import companieshouse.gov.uk.githubapi.model.GitHubSearchResponse;
 import companieshouse.gov.uk.githubapi.model.GitHubTree;
 import companieshouse.gov.uk.githubapi.model.GitHubTreeResponse;
-import companieshouse.gov.uk.githubapi.model.SupportDate;
-import companieshouse.gov.uk.githubapi.service.SupportDateService;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
