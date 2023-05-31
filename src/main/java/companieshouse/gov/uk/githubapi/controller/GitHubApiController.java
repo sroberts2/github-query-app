@@ -1,7 +1,6 @@
 package companieshouse.gov.uk.githubapi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import companieshouse.gov.uk.githubapi.dao.GitHubAppDataRepository;
 import companieshouse.gov.uk.githubapi.dao.GitHubRepositoryRepository;
 import companieshouse.gov.uk.githubapi.model.GitHubAppData;
@@ -37,31 +36,27 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 @Controller
 @RequestMapping
 public class GitHubApiController {
 
-    @Autowired
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubApiController.class);
+
     private final GitHubRepositoryRepository gitHubRepositoryRepository;
 
-    @Autowired
     private final GitHubAppDataRepository gitHubAppDataRepository;
 
     private final RestTemplate restTemplate;
 
-    private final ObjectMapper objectMapper;
-
-
 
     @Autowired
     public GitHubApiController(GitHubRepositoryRepository gitHubRepositoryRepository,
-            GitHubAppDataRepository gitHubAppDataRepository, RestTemplate restTemplate,
-            ObjectMapper objectMapper) {
+            GitHubAppDataRepository gitHubAppDataRepository, RestTemplate restTemplate) {
         this.gitHubRepositoryRepository = gitHubRepositoryRepository;
         this.gitHubAppDataRepository = gitHubAppDataRepository;
         this.restTemplate = restTemplate;
-        this.objectMapper = objectMapper;
     }
 
     @GetMapping("/")
@@ -85,7 +80,6 @@ public class GitHubApiController {
 
         while (hasNext) {
             page++;
-            StringBuilder allResults = new StringBuilder();
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("https://api.github.com/search/repositories")
                     .queryParam("q", "user:companieshouse+language:java")
                     .queryParam("page", page)
@@ -96,11 +90,11 @@ public class GitHubApiController {
             HttpHeaders httpHeaders = response.getHeaders();
             List<String> list = httpHeaders.get("Link");
             Pattern pattern = Pattern.compile("rel=\"Next\"", Pattern.CASE_INSENSITIVE);
-            StringBuilder sb = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder();
             for (String link: list){
-                sb.append(link);
+                stringBuilder.append(link);
             }
-            Matcher matcher = pattern.matcher(sb.toString());
+            Matcher matcher = pattern.matcher(stringBuilder.toString());
             hasNext = matcher.find();
         }
         gitHubRepositoryRepository.deleteAll();
@@ -114,46 +108,52 @@ public class GitHubApiController {
 
 
     public ResponseEntity<String> populateAppData(List<GitHubRepository> repoList) throws JsonProcessingException {
-        AtomicInteger i = new AtomicInteger();
-        repoList.forEach(e ->{
-            i.getAndIncrement();
-            GitHubAppData gitHubAppData = new GitHubAppData();
-            gitHubAppData.setName(e.getName());
-            System.out.println(i+": "+e.getName());
-            String url = e.getTreesUrl().substring(0, e.getTreesUrl().length()-6)+"/"+e.getDefaultBranch();
-            GitHubTreeResponse treeResponse = restTemplate.getForObject(url, GitHubTreeResponse.class);
+        AtomicInteger atomicInteger = new AtomicInteger();
+    repoList.forEach(
+        e -> {
+          atomicInteger.getAndIncrement();
+          GitHubAppData gitHubAppData = new GitHubAppData();
+          gitHubAppData.setName(e.getName());
+          if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Processing {} : {}", atomicInteger, e.getName());
+          }
+          String url =
+              e.getTreesUrl().substring(0, e.getTreesUrl().length() - 6)
+                  + "/"
+                  + e.getDefaultBranch();
+          GitHubTreeResponse treeResponse =
+              restTemplate.getForObject(url, GitHubTreeResponse.class);
 
-            if (treeResponse != null && treeResponse.getTree() != null) {
-                for (GitHubTree tree : treeResponse.getTree()) {
-                    if ("pom.xml".equals(tree.getPath())) {
-                        //System.out.println(tree.getUrl());
-                        String jsonString = restTemplate.getForObject(tree.getUrl(), String.class);
-                        JsonParser jsonParser = JsonParserFactory.getJsonParser();
-                        Object jsonObject = jsonParser.parseMap(jsonString);
-                        String content = "";
-                        // Extract the content field from the JSON object
-                        if (jsonObject instanceof Map) {
-                            Map<String, Object> jsonMap = (Map<String, Object>) jsonObject;
-                            content = (String) jsonMap.get("content");
-                        }
-                        String cleanContent = content.replaceAll("[^A-Za-z0-9+/=]", "");
-
-                        byte[] decodedBytes = Base64.getDecoder().decode(cleanContent);
-
-                        // Convert byte array to String
-                        String decodedXml = new String(decodedBytes, StandardCharsets.UTF_8);
-                        gitHubAppData.setSpringbootversion(getSpringBootVersion(decodedXml));
-                        gitHubAppDataRepository.save(gitHubAppData);
-
-                    }
+          if (treeResponse != null && treeResponse.getTree() != null) {
+            for (GitHubTree tree : treeResponse.getTree()) {
+              if ("pom.xml".equals(tree.getPath())) {
+                // System.out.println(tree.getUrl());
+                String jsonString = restTemplate.getForObject(tree.getUrl(), String.class);
+                JsonParser jsonParser = JsonParserFactory.getJsonParser();
+                Object jsonObject = jsonParser.parseMap(jsonString);
+                String content = "";
+                // Extract the content field from the JSON object
+                if (jsonObject instanceof Map) {
+                  Map<String, Object> jsonMap = (Map<String, Object>) jsonObject;
+                  content = (String) jsonMap.get("content");
                 }
+                String cleanContent = content.replaceAll("[^A-Za-z0-9+/=]", "");
+
+                byte[] decodedBytes = Base64.getDecoder().decode(cleanContent);
+
+                // Convert byte array to String
+                String decodedXml = new String(decodedBytes, StandardCharsets.UTF_8);
+                gitHubAppData.setSpringbootversion(getSpringBootVersion(decodedXml));
+                gitHubAppDataRepository.save(gitHubAppData);
+              }
             }
-            //sleep for two seconds
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
-            }
+          }
+          // sleep for two seconds
+          try {
+            Thread.sleep(2000);
+          } catch (InterruptedException ex) {
+            LOGGER.error("Error while sleeping", ex);
+          }
         });
         return ResponseEntity.ok("");
     }
@@ -166,7 +166,7 @@ public class GitHubApiController {
         return resultList;
     }
 
-    public static String getSpringBootVersion(String pomString) {
+    public String getSpringBootVersion(String pomString)  {
         try {
             // Create a DocumentBuilder
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -219,12 +219,13 @@ public class GitHubApiController {
                 springBootVersion = "No Spring detected";
             }
             return springBootVersion;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            LOGGER.error("Error processing data to retrieve Spring boot version", e);
+
         }
         return null;
     }
-    private static String getProperty(Element properties, String propertyName) {
+    private String getProperty(Element properties, String propertyName) {
         if (properties != null) {
           NodeList propertyList = properties.getElementsByTagName(propertyName);
           if (propertyList.getLength() > 0) {
