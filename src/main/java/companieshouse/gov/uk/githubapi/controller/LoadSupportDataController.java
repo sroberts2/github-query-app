@@ -34,7 +34,7 @@ public class LoadSupportDataController {
 
     //TODO cron instead of endpoint
     @GetMapping("/support-data-add")
-    public void getSpringBootLifecycleDates() throws JsonProcessingException {
+    public void populateSpringBootLifecycleDates() throws JsonProcessingException {
         String jsonString = restTemplate.getForObject("https://endoflife.date/api/spring-boot.json", String.class);
         List<SupportDate> info = objectMapper.readValue(jsonString, new TypeReference<List<SupportDate>>() {});
         for (SupportDate sd : info){

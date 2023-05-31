@@ -1,8 +1,6 @@
 package companieshouse.gov.uk.githubapi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import companieshouse.gov.uk.githubapi.dao.GitHubAppDataRepository;
 import companieshouse.gov.uk.githubapi.dao.GitHubRepositoryRepository;
 import companieshouse.gov.uk.githubapi.model.GitHubAppData;
@@ -10,8 +8,7 @@ import companieshouse.gov.uk.githubapi.model.GitHubRepository;
 import companieshouse.gov.uk.githubapi.model.GitHubSearchResponse;
 import companieshouse.gov.uk.githubapi.model.GitHubTree;
 import companieshouse.gov.uk.githubapi.model.GitHubTreeResponse;
-import companieshouse.gov.uk.githubapi.model.SupportDate;
-import companieshouse.gov.uk.githubapi.service.SupportDateService;
+import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -20,6 +17,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.json.JsonParserFactory;
@@ -36,31 +36,27 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 @Controller
 @RequestMapping
 public class GitHubApiController {
 
-    @Autowired
+    private static final Logger logger = LoggerFactory.getLogger(GitHubApiController.class);
+
     private final GitHubRepositoryRepository gitHubRepositoryRepository;
 
-    @Autowired
     private final GitHubAppDataRepository gitHubAppDataRepository;
 
     private final RestTemplate restTemplate;
 
-    private final ObjectMapper objectMapper;
-
-
 
     @Autowired
     public GitHubApiController(GitHubRepositoryRepository gitHubRepositoryRepository,
-            GitHubAppDataRepository gitHubAppDataRepository, RestTemplate restTemplate,
-            ObjectMapper objectMapper) {
+            GitHubAppDataRepository gitHubAppDataRepository, RestTemplate restTemplate) {
         this.gitHubRepositoryRepository = gitHubRepositoryRepository;
         this.gitHubAppDataRepository = gitHubAppDataRepository;
         this.restTemplate = restTemplate;
-        this.objectMapper = objectMapper;
     }
 
     @GetMapping("/")
@@ -84,7 +80,6 @@ public class GitHubApiController {
 
         while (hasNext) {
             page++;
-            StringBuilder allResults = new StringBuilder();
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("https://api.github.com/search/repositories")
                     .queryParam("q", "user:companieshouse+language:java")
                     .queryParam("page", page)
@@ -95,11 +90,11 @@ public class GitHubApiController {
             HttpHeaders httpHeaders = response.getHeaders();
             List<String> list = httpHeaders.get("Link");
             Pattern pattern = Pattern.compile("rel=\"Next\"", Pattern.CASE_INSENSITIVE);
-            StringBuilder sb = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder();
             for (String link: list){
-                sb.append(link);
+                stringBuilder.append(link);
             }
-            Matcher matcher = pattern.matcher(sb.toString());
+            Matcher matcher = pattern.matcher(stringBuilder.toString());
             hasNext = matcher.find();
         }
         gitHubRepositoryRepository.deleteAll();
@@ -113,12 +108,12 @@ public class GitHubApiController {
 
 
     public ResponseEntity<String> populateAppData(List<GitHubRepository> repoList) throws JsonProcessingException {
-        AtomicInteger i = new AtomicInteger();
+        AtomicInteger atomicInteger = new AtomicInteger();
         repoList.forEach(e ->{
-            i.getAndIncrement();
+            atomicInteger.getAndIncrement();
             GitHubAppData gitHubAppData = new GitHubAppData();
             gitHubAppData.setName(e.getName());
-            System.out.println(i+": "+e.getName());
+            logger.info("Processing {} : {}", atomicInteger, e.getName());
             String url = e.getTreesUrl().substring(0, e.getTreesUrl().length()-6)+"/"+e.getDefaultBranch();
             GitHubTreeResponse treeResponse = restTemplate.getForObject(url, GitHubTreeResponse.class);
 
@@ -151,7 +146,7 @@ public class GitHubApiController {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
+                logger.error("Error while sleeping", ex);
             }
         });
         return ResponseEntity.ok("");
@@ -165,7 +160,7 @@ public class GitHubApiController {
         return resultList;
     }
 
-    public static String getSpringBootVersion(String pomString) {
+    public String getSpringBootVersion(String pomString)  {
         try {
             // Create a DocumentBuilder
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -218,12 +213,12 @@ public class GitHubApiController {
                 springBootVersion = "No Spring detected";
             }
             return springBootVersion;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            logger.error("Error processing data to retrieve Spring boot version", e);
         }
         return null;
     }
-    private static String getProperty(Element properties, String propertyName) {
+    private String getProperty(Element properties, String propertyName) {
         if (properties != null) {
           NodeList propertyList = properties.getElementsByTagName(propertyName);
           if (propertyList.getLength() > 0) {

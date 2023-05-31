@@ -12,12 +12,12 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 public class MongoConfig {
 
     @Bean
-    MongoClient mongoClient() {
+    public MongoClient mongoClient() {
         return MongoClients.create("mongodb://localhost:27017/testdb");
     }
 
     @Bean
-    MongoTemplate mongoTemplate(MongoClient mongoClient) {
+    public MongoTemplate mongoTemplate(MongoClient mongoClient) {
         return new MongoTemplate(mongoClient, "testdb");
     }
 }
