@@ -2,8 +2,10 @@ package companieshouse.gov.uk.githubapi.service;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -22,6 +24,8 @@ import companieshouse.gov.uk.githubapi.service.mvn.ParseRule;
 @Component
 public class MavenDependenciesParsingService {
 
+    private static final Pattern PROPERTY_VALUE_CONSUMER_PATTERN = Pattern.compile("\\$\\{[^\\}]+\\}");
+    
     private final List<ParseRule> parseRules;
     private final DocumentBuilderFactory documentBuilderFactory;
 
@@ -40,7 +44,8 @@ public class MavenDependenciesParsingService {
 
             return parseRules.stream()
                 .flatMap(rule -> rule.run(document).entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .filter(entry -> !PROPERTY_VALUE_CONSUMER_PATTERN.matcher(entry.getValue()).matches())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> existing));
         } catch (final ParserConfigurationException|IOException|SAXException parserConfigurationException) {
             throw new PoolyFormattedDependenciesFileException("Could not parse POM", parserConfigurationException);
         }

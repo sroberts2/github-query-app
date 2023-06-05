@@ -102,4 +102,55 @@ public class MavenDependenciesParsingServiceTest {
 
         assertThatThrownBy(() -> mavenDependenciesParsingService.parseDependencies("<bad")).hasMessageContaining("Could not parse POM").hasCauseInstanceOf(SAXException.class);
     }
+
+    @Test
+    void testParseDependenciesHandlesDuplicates() throws Exception {
+        Map<String, String> resultFromOne = Map.of(
+            "spring", "3.0.0",
+            "assertj", "2.4.2"
+        );
+        when(ruleOne.run(any())).thenReturn(resultFromOne);
+
+        Map<String, String> resultFromTwo = Map.of(
+            "junit", "4.0.0",
+            "assertj", "2.4.1"
+        );
+
+
+
+        when(ruleTwo.run(any())).thenReturn(resultFromTwo);
+
+        final Map<String, String> result = mavenDependenciesParsingService.parseDependencies(demoPom);
+
+        assertThat(result).containsExactly(
+            Map.entry("spring", "3.0.0"),
+            Map.entry("junit", "4.0.0"),
+            Map.entry("assertj", "2.4.2")
+        );
+    }
+
+    @Test
+    void testParseDependenciesIgnoresTemplatePropertyValues() throws Exception {
+        Map<String, String> resultFromOne = Map.of(
+            "spring", "3.0.0",
+            "assertj", "2.4.2"
+        );
+        when(ruleOne.run(any())).thenReturn(resultFromOne);
+
+        Map<String, String> resultFromTwo = Map.of(
+            "junit", "4.0.0",
+            "depTwo", "${depTwo.version}"
+        );
+
+        when(ruleTwo.run(any())).thenReturn(resultFromTwo);
+
+        final Map<String, String> result = mavenDependenciesParsingService.parseDependencies(demoPom);
+
+        assertThat(result).containsExactly(
+            Map.entry("spring", "3.0.0"),
+            Map.entry("junit", "4.0.0"),
+            Map.entry("assertj", "2.4.2")
+        );
+
+    }
 }

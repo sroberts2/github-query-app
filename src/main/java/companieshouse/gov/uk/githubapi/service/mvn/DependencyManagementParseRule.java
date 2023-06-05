@@ -9,10 +9,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+@Component
 public class DependencyManagementParseRule implements ParseRule {
 
     @Override
@@ -31,7 +33,7 @@ public class DependencyManagementParseRule implements ParseRule {
                     .filter(spec -> spec.version().isPresent())
                     .map(spec -> Map.of(normaliseName(spec.artifactId()), spec.version().get()))
                     .flatMap(map -> map.entrySet().stream())
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> existing));
             }
         ).orElseGet(() -> Map.of());
     }

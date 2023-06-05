@@ -3,7 +3,10 @@ package companieshouse.gov.uk.githubapi.service.mvn;
 import static companieshouse.gov.uk.githubapi.util.NameUtils.normaliseName;
 import static companieshouse.gov.uk.githubapi.util.XmlUtils.getNodeStream;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -29,7 +32,7 @@ public class PropertiesParseRule implements ParseRule {
         return getNodeStream(properties.getChildNodes())
             .filter(node -> node.getNodeName().toLowerCase().strip().endsWith(".version"))
             .flatMap(node -> Map.of(normaliseName(node.getNodeName(), "."), node.getTextContent()).entrySet().stream())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> existing));
     }
 
 }
