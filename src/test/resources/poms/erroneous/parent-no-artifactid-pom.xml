@@ -4,7 +4,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.0.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
@@ -14,9 +13,6 @@
 	<name>github-query-api</name>
 	<description>Github API call</description>
 	<properties>
-		<java.version>17</java.version>
-		<http.client.version>5.2.1</http.client.version>
-		<apache.commons-lang3.version>3.12.0</apache.commons-lang3.version>
 	</properties>
 
 	<dependencies>
@@ -52,26 +48,15 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>${apache.commons-lang3.version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <version>4.4.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
 			<version>${assertj.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-params</artifactId>
 			<scope>test</scope>
 		</dependency>
 

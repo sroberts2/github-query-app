@@ -1,25 +1,28 @@
 package companieshouse.gov.uk.githubapi.config;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.client.RestOperations;
 
 @Configuration
 @EnableWebMvc
 public class WebConfig implements WebMvcConfigurer {
 
-    private String token = "";
+    @Bean
+    public RestOperations restOperations(final RestTemplateBuilder restTemplateBuilder) {
+        return restTemplateBuilder
+            .build();
+    }
 
     @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
-        return restTemplateBuilder.additionalInterceptors((request, body, execution) -> {
-            request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer "+token);
-            return execution.execute(request, body);
-        }).build();
+    public DocumentBuilderFactory documentBuilderFactory() {
+        return DocumentBuilderFactory.newInstance();
     }
 
     @Override
