@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestOperations;
 
 @Controller
 @RequestMapping
@@ -20,11 +20,11 @@ public class LoadSupportDataController {
     @Autowired
     private final SupportDataService supportDataService;
 
-    private final RestTemplate restTemplate;
+    private final RestOperations restTemplate;
 
     private final ObjectMapper objectMapper;
 
-    public LoadSupportDataController(SupportDataService supportDataService, RestTemplate restTemplate,
+    public LoadSupportDataController(SupportDataService supportDataService, RestOperations restTemplate,
             ObjectMapper objectMapper){
 
         this.supportDataService = supportDataService;
