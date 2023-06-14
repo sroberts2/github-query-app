@@ -11,7 +11,7 @@
 
     <groupId>companieshouse.gov.uk</groupId>
     <artifactId>github-query-api</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>unversioned</version>
     <name>github-query-api</name>
     <description>Github API call</description>
     <properties>
