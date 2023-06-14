@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.gov.uk.githubapi.scheduled;
+package uk.gov.companieshouse.githubapi.scheduled;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;

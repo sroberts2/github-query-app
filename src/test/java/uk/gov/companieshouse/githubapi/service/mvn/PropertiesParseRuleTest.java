@@ -1,7 +1,7 @@
-package uk.gov.companieshouse.gov.uk.githubapi.service.mvn;
+package uk.gov.companieshouse.githubapi.service.mvn;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.companieshouse.gov.uk.githubapi.util.PomUtils.loadDemoPom;
+import static uk.gov.companieshouse.githubapi.util.PomUtils.loadDemoPom;
 
 import uk.gov.companieshouse.githubapi.service.mvn.PropertiesParseRule;
 

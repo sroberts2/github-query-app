@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.gov.uk.githubapi;
+package uk.gov.companieshouse.githubapi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

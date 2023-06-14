@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.gov.uk.githubapi.service;
+package uk.gov.companieshouse.githubapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;

@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.gov.uk.githubapi.util;
+package uk.gov.companieshouse.githubapi.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.companieshouse.githubapi.util.NameUtils.normaliseName;

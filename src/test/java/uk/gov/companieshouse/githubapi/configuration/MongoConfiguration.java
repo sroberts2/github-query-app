@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.gov.uk.githubapi.configuration;
+package uk.gov.companieshouse.githubapi.configuration;
 
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;

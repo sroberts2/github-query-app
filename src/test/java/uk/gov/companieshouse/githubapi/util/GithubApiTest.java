@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.gov.uk.githubapi.util;
+package uk.gov.companieshouse.githubapi.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -8,7 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.gov.uk.githubapi.util.ApiUtils.makeResponseEntity;
+import static uk.gov.companieshouse.githubapi.util.ApiUtils.makeResponseEntity;
 
 import uk.gov.companieshouse.githubapi.model.GitHubRepository;
 import uk.gov.companieshouse.githubapi.model.GitHubSearchResponse;

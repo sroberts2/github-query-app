@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.gov.uk.githubapi.util;
+package uk.gov.companieshouse.githubapi.util;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

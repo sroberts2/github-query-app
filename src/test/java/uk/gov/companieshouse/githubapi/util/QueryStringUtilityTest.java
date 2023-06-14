@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.gov.uk.githubapi.util;
+package uk.gov.companieshouse.githubapi.util;
 
 import org.junit.jupiter.api.Test;
 

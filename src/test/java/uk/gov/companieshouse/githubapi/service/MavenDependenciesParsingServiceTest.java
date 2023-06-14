@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.gov.uk.githubapi.service;
+package uk.gov.companieshouse.githubapi.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;

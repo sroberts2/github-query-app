@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.gov.uk.githubapi.service;
+package uk.gov.companieshouse.githubapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -8,8 +8,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.gov.uk.githubapi.util.ApiUtils.createLinks;
-import static uk.gov.companieshouse.gov.uk.githubapi.util.ApiUtils.makeResponseEntity;
+import static uk.gov.companieshouse.githubapi.util.ApiUtils.createLinks;
+import static uk.gov.companieshouse.githubapi.util.ApiUtils.makeResponseEntity;
 
 import uk.gov.companieshouse.githubapi.model.GitHubLeaf;
 import uk.gov.companieshouse.githubapi.model.GitHubRepository;
@@ -20,7 +20,7 @@ import uk.gov.companieshouse.githubapi.service.GithubRepositoryService;
 import uk.gov.companieshouse.githubapi.service.MavenDependenciesParsingService;
 import uk.gov.companieshouse.githubapi.util.GithubApi;
 import uk.gov.companieshouse.githubapi.util.QueryStringUtility;
-import uk.gov.companieshouse.gov.uk.githubapi.util.SequenceAnswer;
+import uk.gov.companieshouse.githubapi.util.SequenceAnswer;
 
 import java.net.URI;
 import java.net.URISyntaxException;

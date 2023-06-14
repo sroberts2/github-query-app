@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @Configuration
-@EnableMongoRepositories(basePackages = "companieshouse.gov.uk.githubapi.dao")
+@EnableMongoRepositories(basePackages = "uk.gov.companieshouse.githubapi.dao")
 public class MongoConfig {
 
     @Bean
