@@ -28,7 +28,11 @@ public class GitHubRepositoryDao {
 
     @Override
     public String toString() {
-        return String.format("GithubRepositoryDao[repoName=%, dependencies=%s]", repoName, dependencies);
+        return String.format(
+                "GithubRepositoryDao[repoName=%, dependencies=%s]",
+                repoName,
+                dependencies
+        );
     }
 
 
@@ -43,23 +47,33 @@ public class GitHubRepositoryDao {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+
+        if (getClass() != obj.getClass()) {
             return false;
+        }
+
         GitHubRepositoryDao other = (GitHubRepositoryDao) obj;
         if (repoName == null) {
-            if (other.repoName != null)
+            if (other.repoName != null) {
                 return false;
-        } else if (!repoName.equals(other.repoName))
+            }
+        } else if (!repoName.equals(other.repoName)) {
             return false;
+        }
         if (dependencies == null) {
-            if (other.dependencies != null)
+            if (other.dependencies != null) {
                 return false;
-        } else if (!dependencies.equals(other.dependencies))
+            }
+        } else if (!dependencies.equals(other.dependencies)) {
             return false;
+        }
         return true;
     }
 

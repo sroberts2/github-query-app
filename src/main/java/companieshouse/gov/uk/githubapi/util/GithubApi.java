@@ -1,5 +1,7 @@
 package companieshouse.gov.uk.githubapi.util;
 
+import companieshouse.gov.uk.githubapi.exception.GithubApiCallErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +16,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
-import companieshouse.gov.uk.githubapi.exception.GithubApiCallErrorException;
-
 @Component
 public class GithubApi {
     
@@ -24,22 +24,35 @@ public class GithubApi {
     private final RestOperations restOperations;
     private final String githubAuthenticationToken;
 
-    public GithubApi(final RestOperations restOperations, @Value("${github.pat}") final String githubAuthenticationToken) {
+    public GithubApi(
+            final RestOperations restOperations,
+            @Value("${github.pat}") final String githubAuthenticationToken) {
         this.restOperations = restOperations;
         this.githubAuthenticationToken = githubAuthenticationToken;
     }
 
+
+    /**
+     * Get the Github API response from supplied url for with type.
+     * 
+     * @param url           The url to call
+     * @param responseClass The class type of the response
+     * @return The response of the Github API call
+     */
     @Retryable(
-        retryFor = {
-            GithubApiCallErrorException.class,
-            RestClientException.class
-        },
-        backoff = @Backoff(delayExpression = "${app.retry.delay}", multiplierExpression = "${app.retry.multiplier}"),
-        maxAttempts = 5
+            retryFor = {
+                GithubApiCallErrorException.class,
+                RestClientException.class
+            },
+            backoff = @Backoff(
+                    delayExpression = "${app.retry.delay}",
+                    multiplierExpression = "${app.retry.multiplier}"
+            ),
+            maxAttempts = 5
     )
     public <T> ResponseEntity<T> get(
-        final String url,
-        final Class<T> responseClass
+            final String url,
+            final Class<T> responseClass
     ) {
         final HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setBearerAuth(githubAuthenticationToken);
@@ -53,10 +66,19 @@ public class GithubApi {
             );
         } catch (final RestClientException restClientException) {
             if (restClientException instanceof HttpStatusCodeException) {
-                final HttpStatusCodeException httpStatusCodeException = (HttpStatusCodeException) restClientException;
-                LOGGER.warn("API call to {} failed with status {}", url, httpStatusCodeException.getStatusCode());
+                final HttpStatusCodeException httpStatusCodeException = 
+                        (HttpStatusCodeException) restClientException;
 
-                throw new GithubApiCallErrorException("Github API Call failed with: " + httpStatusCodeException.getStatusText(), restClientException);
+                LOGGER.warn(
+                        "API call to {} failed with status {}",
+                        url,
+                        httpStatusCodeException.getStatusCode()
+                );
+
+                throw new GithubApiCallErrorException(
+                        "Github API Call failed with: " + httpStatusCodeException.getStatusText(),
+                        restClientException
+                );
             } else {
                 LOGGER.warn("Api Call failed: {}", restClientException.getMessage());
                 throw restClientException;

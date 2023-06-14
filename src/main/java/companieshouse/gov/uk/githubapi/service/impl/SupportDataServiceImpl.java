@@ -11,7 +11,7 @@ public class SupportDataServiceImpl implements SupportDataService {
     private final SupportDataRepository supportDataRepository;
 
     @Autowired
-    public SupportDataServiceImpl(SupportDataRepository supportDataRepository){
+    public SupportDataServiceImpl(SupportDataRepository supportDataRepository) {
         this.supportDataRepository = supportDataRepository;
     }
 

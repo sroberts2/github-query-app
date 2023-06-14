@@ -1,5 +1,10 @@
 package companieshouse.gov.uk.githubapi.scheduled;
 
+import companieshouse.gov.uk.githubapi.dao.GitHubRepoRepository;
+import companieshouse.gov.uk.githubapi.model.GitHubRepository;
+import companieshouse.gov.uk.githubapi.model.GitHubRepositoryDao;
+import companieshouse.gov.uk.githubapi.service.GithubRepositoryService;
+
 import java.util.List;
 import java.util.Map;
 
@@ -8,11 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import companieshouse.gov.uk.githubapi.dao.GitHubRepoRepository;
-import companieshouse.gov.uk.githubapi.model.GitHubRepository;
-import companieshouse.gov.uk.githubapi.model.GitHubRepositoryDao;
-import companieshouse.gov.uk.githubapi.service.GithubRepositoryService;
 
 @Component
 public class FetchGithubRepositories {
@@ -25,16 +25,33 @@ public class FetchGithubRepositories {
     private final ScheduledJobState scheduledJobState;
 
     @Autowired
-    public FetchGithubRepositories(final GithubRepositoryService githubRepositoryService, final GitHubRepoRepository gitHubRepoRepository) {
+    public FetchGithubRepositories(
+            final GithubRepositoryService githubRepositoryService,
+            final GitHubRepoRepository gitHubRepoRepository
+    ) {
         this(githubRepositoryService, gitHubRepoRepository, new ScheduledJobState());
     }
 
-    public FetchGithubRepositories(final GithubRepositoryService githubRepositoryService, final GitHubRepoRepository gitHubRepoRepository, final ScheduledJobState scheduledJobState) {
+    /**
+     * Constructor to create the task with all arguments.
+     * @param githubRepositoryService The GithubRepositoryService to use
+     * @param gitHubRepoRepository The GithubRepoRepsository to use
+     * @param scheduledJobState The initial ScheduledJobState
+     */
+    public FetchGithubRepositories(
+            final GithubRepositoryService githubRepositoryService,
+            final GitHubRepoRepository gitHubRepoRepository,
+            final ScheduledJobState scheduledJobState
+    ) {
         this.githubRepositoryService = githubRepositoryService;
         this.gitHubRepoRepository =  gitHubRepoRepository;
         this.scheduledJobState = scheduledJobState;
     }
 
+    /**
+     * Method to populate the Github Repository cache with the latest version infromation. Spring
+     * will automatically run this on a schedule defined by the constant POPULATION_CRON_EXPRESSON.
+     */
     @Scheduled(cron = POPULATION_CRON_EXPRESSION)
     public void populateRepositoryCache() {
         if (isRunning()) {
@@ -49,13 +66,17 @@ public class FetchGithubRepositories {
         final List<GitHubRepository> repositories = githubRepositoryService.listJavaRepositories();
 
         repositories
-            .parallelStream()
-            .forEach(repository -> {
-                LOGGER.debug("Updating dependencies of {}", repository.name());
-                final Map<String, String> dependencies = githubRepositoryService.loadDependencies(repository);
+                .parallelStream()
+                .forEach(repository -> {
+                    LOGGER.debug("Updating dependencies of {}", repository.name());
+                    final Map<String, String> dependencies =
+                            githubRepositoryService.loadDependencies(repository);
 
-                gitHubRepoRepository.save(new GitHubRepositoryDao(repository.name(), dependencies));
-            });
+                    gitHubRepoRepository.save(
+                            new GitHubRepositoryDao(repository.name(), dependencies)
+                    );
+                });
+
         scheduledJobState.updateRunningState(false);
 
         LOGGER.info("Cache population complete");

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -22,13 +21,24 @@ import org.springframework.http.ResponseEntity;
 
 public class GithubApiPaginationService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(GithubApiPaginationService.class);
-    private static final Pattern NEXT_LINK_PATTERN = Pattern.compile("rel=\"next\"", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GithubApiPaginationService.class);
+    private static final Pattern NEXT_LINK_PATTERN = Pattern.compile(
+            "rel=\"next\"",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+    );
+
     private static final Pattern LINK_PATTERN = Pattern.compile("<([^>]+)>", Pattern.DOTALL);
 
     private GithubApiPaginationService() {}
 
-    public static <T> List<T> paginateResponseFromApi(final Function<Integer, ResponseEntity<T>> pageSupplier) {
+    /**
+     * Paginate through the GitHub API responses.
+     * @param pageSupplier The function to get a single page of results from the API
+     * @return A list of all the items from the API
+     */
+    public static <T> List<T> paginateResponseFromApi(
+            final Function<Integer, ResponseEntity<T>> pageSupplier
+    ) {
         final List<T> allItems = new ArrayList<>();
 
         Optional<Integer> page = Optional.of(1);
@@ -44,13 +54,17 @@ public class GithubApiPaginationService {
             final HttpHeaders httpHeaders = response.getHeaders();
 
             final List<String> linkHeaders = httpHeaders.get("Link");
-            final Stream<String> linkStream = linkHeaders == null ? Stream.empty() : linkHeaders.parallelStream();
+            final Stream<String> linkStream = linkHeaders == null
+                    ? Stream.empty()
+                    : linkHeaders.parallelStream();
             
             page = linkStream
                 .flatMap(header -> Arrays.stream(header.split(",")))
                 .filter(link -> NEXT_LINK_PATTERN.matcher(link).find())
                 .map(link -> link.split(";"))
-                .map(linkParts -> Arrays.stream(linkParts).map(String::strip).toArray(String[]::new))
+                .map(linkParts -> 
+                        Arrays.stream(linkParts).map(String::strip).toArray(String[]::new)
+                )
                 .map(linkParts -> linkParts[0])
                 .findFirst()
                 .map(GithubApiPaginationService::getRequestedPageNumber);

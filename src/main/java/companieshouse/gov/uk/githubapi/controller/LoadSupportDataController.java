@@ -24,20 +24,38 @@ public class LoadSupportDataController {
 
     private final ObjectMapper objectMapper;
 
-    public LoadSupportDataController(SupportDataService supportDataService, RestOperations restTemplate,
-            ObjectMapper objectMapper){
+    /**
+     * Constructor for the LoadSupportDataController.
+     * @param supportDataService supportDataService to load SupportData
+     * @param restTemplate restTemplate to make API calls
+     * @param objectMapper objectMapper to map JSON to Java
+     */
+    public LoadSupportDataController(
+                SupportDataService supportDataService,
+                RestOperations restTemplate,
+                ObjectMapper objectMapper
+    ) {
 
         this.supportDataService = supportDataService;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * Populate the database with the Spring Boot lifecycle dates.
+     * @throws JsonProcessingException if the JSON cannot be processed
+     */
     //TODO cron instead of endpoint
     @GetMapping("/support-data-add")
     public void populateSpringBootLifecycleDates() throws JsonProcessingException {
-        String jsonString = restTemplate.getForObject("https://endoflife.date/api/spring-boot.json", String.class);
-        List<SupportData> info = objectMapper.readValue(jsonString, new TypeReference<List<SupportData>>() {});
-        for (SupportData sd : info){
+        String jsonString = restTemplate.getForObject(
+                "https://endoflife.date/api/spring-boot.json", String.class
+        );
+        List<SupportData> info = objectMapper.readValue(
+                jsonString,
+                new TypeReference<List<SupportData>>() {}
+        );
+        for (SupportData sd : info) {
             supportDataService.addSupportData(sd);
         }
     }

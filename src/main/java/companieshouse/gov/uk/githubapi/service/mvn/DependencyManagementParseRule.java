@@ -1,13 +1,14 @@
 package companieshouse.gov.uk.githubapi.service.mvn;
 
-import static companieshouse.gov.uk.githubapi.util.XmlUtils.loadDependencySpec;
+import static companieshouse.gov.uk.githubapi.util.NameUtils.normaliseName;
+
+import static companieshouse.gov.uk.githubapi.util.StreamUtils.collectToMap;
 import static companieshouse.gov.uk.githubapi.util.XmlUtils.getElementsByTagName;
 import static companieshouse.gov.uk.githubapi.util.XmlUtils.getNodeStream;
-import static companieshouse.gov.uk.githubapi.util.NameUtils.normaliseName;
+import static companieshouse.gov.uk.githubapi.util.XmlUtils.loadDependencySpec;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
@@ -21,7 +22,8 @@ public class DependencyManagementParseRule implements ParseRule {
     public Map<String, String> run(final Document xmlDocument) {
         
         final Element root = xmlDocument.getDocumentElement();
-        final Optional<Element> dependencyManagement = getElementsByTagName(root, "dependencyManagement");
+        final Optional<Element> dependencyManagement = 
+                getElementsByTagName(root, "dependencyManagement");
 
         return dependencyManagement.map(
             element -> {
@@ -33,7 +35,7 @@ public class DependencyManagementParseRule implements ParseRule {
                     .filter(spec -> spec.version().isPresent())
                     .map(spec -> Map.of(normaliseName(spec.artifactId()), spec.version().get()))
                     .flatMap(map -> map.entrySet().stream())
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> existing));
+                    .collect(collectToMap());
             }
         ).orElseGet(() -> Map.of());
     }

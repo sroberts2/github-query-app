@@ -1,8 +1,8 @@
 package companieshouse.gov.uk.githubapi.service.mvn;
 
-import org.w3c.dom.Document;
-
 import java.util.Map;
+
+import org.w3c.dom.Document;
 
 public interface ParseRule {
 

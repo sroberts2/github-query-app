@@ -6,7 +6,7 @@ import org.springframework.retry.annotation.EnableRetry;
 
 
 @ConditionalOnProperty(
-    value = "app.retry.enable", havingValue = "true", matchIfMissing = true
+        value = "app.retry.enable", havingValue = "true", matchIfMissing = true
 )
 @Configuration
 @EnableRetry

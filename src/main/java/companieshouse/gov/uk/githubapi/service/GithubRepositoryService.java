@@ -1,7 +1,12 @@
 package companieshouse.gov.uk.githubapi.service;
 
-
 import static companieshouse.gov.uk.githubapi.service.GithubApiPaginationService.paginateResponseFromApi;
+
+import companieshouse.gov.uk.githubapi.model.GitHubLeaf;
+import companieshouse.gov.uk.githubapi.model.GitHubRepository;
+import companieshouse.gov.uk.githubapi.model.GitHubSearchResponse;
+import companieshouse.gov.uk.githubapi.model.GitHubTreeResponse;
+import companieshouse.gov.uk.githubapi.util.GithubApi;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -16,11 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import companieshouse.gov.uk.githubapi.model.GitHubLeaf;
-import companieshouse.gov.uk.githubapi.model.GitHubRepository;
-import companieshouse.gov.uk.githubapi.model.GitHubSearchResponse;
-import companieshouse.gov.uk.githubapi.model.GitHubTreeResponse;
-import companieshouse.gov.uk.githubapi.util.GithubApi;
 
 @Service
 public class GithubRepositoryService {
@@ -29,19 +29,29 @@ public class GithubRepositoryService {
     private static final String GITHUB_SEARCH_API_URL = "https://api.github.com/search/repositories";
     private static final int PAGE_SIZE = 100;
     private static final String COMPANIES_HOUSE_ORGANISATION_USER_NAME = "companieshouse";
-    private static final String FILTER_QUERY = "user:" + COMPANIES_HOUSE_ORGANISATION_USER_NAME + "+language:java";
+    private static final String FILTER_QUERY = "user:"
+            + COMPANIES_HOUSE_ORGANISATION_USER_NAME 
+            + "+language:java";
 
     private final GithubApi githubApi;
     private final MavenDependenciesParsingService mvnDependenciesParsingService;
 
     @Autowired
-    public GithubRepositoryService(final GithubApi githubApi, final MavenDependenciesParsingService mvnDependenciesParsingService) {
+    public GithubRepositoryService(
+                final GithubApi githubApi,
+                final MavenDependenciesParsingService mvnDependenciesParsingService
+    ) {
         this.githubApi = githubApi;
         this.mvnDependenciesParsingService = mvnDependenciesParsingService;
     }
 
+    /**
+     * List Java Repositories held by Companies House in Github.
+     * @return List of GitHubRepository objects
+     */
     public List<GitHubRepository> listJavaRepositories() {
-        final List<GitHubSearchResponse> searchResponses = paginateResponseFromApi(this::callGithubSearchApiForRepositories);
+        final List<GitHubSearchResponse> searchResponses = 
+                paginateResponseFromApi(this::callGithubSearchApiForRepositories);
 
         LOGGER.debug("Repositories loaded.");
 
@@ -50,6 +60,11 @@ public class GithubRepositoryService {
             .toList();
     }
 
+    /**
+     * Load the dependencies for a given GitHubRepository.
+     * @param githubRepository GitHubRepository to load dependencies for
+     * @return Map of dependency versions, keyed on normalised dependency name
+     */
     public Map<String, String> loadDependencies(final GitHubRepository githubRepository) {
         final GitHubTreeResponse gitHubTreeResponse = getGithubTreeOfRepository(githubRepository);
 
@@ -61,9 +76,16 @@ public class GithubRepositoryService {
                 final String dependenciesFile = loadLeaf(tree.url());
 
                 try {
-                    return Optional.of(mvnDependenciesParsingService.parseDependencies(dependenciesFile));
+                    return Optional.of(
+                            mvnDependenciesParsingService.parseDependencies(dependenciesFile)
+                    );
                 } catch (final Exception saxParseException) {
-                    LOGGER.warn("Could not load {} of repo {}", tree.url(), githubRepository.name(), saxParseException);
+                    LOGGER.warn(
+                            "Could not load {} of repo {}",
+                            tree.url(),
+                            githubRepository.name(),
+                            saxParseException
+                    );
 
                     return Optional.<Map<String, String>>empty();
                 }
@@ -84,16 +106,21 @@ public class GithubRepositoryService {
 
     private GitHubTreeResponse getGithubTreeOfRepository(final GitHubRepository githubRepository) {
         final String treesUrl = githubRepository.treesUrl();
-        final String normalisedTreesUrl = treesUrl.substring(0, treesUrl.indexOf("{")) + "/" + githubRepository.defaultBranch();
+        final String normalisedTreesUrl = treesUrl.substring(0, treesUrl.indexOf("{"))
+                 + "/"
+                 + githubRepository.defaultBranch();
 
         return githubApi.get(normalisedTreesUrl, GitHubTreeResponse.class).getBody();
     }
 
-    private ResponseEntity<GitHubSearchResponse> callGithubSearchApiForRepositories(final int page) {
-        final UriComponentsBuilder uriBuilder =  UriComponentsBuilder.fromHttpUrl(GITHUB_SEARCH_API_URL)
-            .queryParam("q", FILTER_QUERY)
-            .queryParam("page", page)
-            .queryParam("per_page", PAGE_SIZE);
+    private ResponseEntity<GitHubSearchResponse> callGithubSearchApiForRepositories(
+            final int page
+    ) {
+        final UriComponentsBuilder uriBuilder =
+                UriComponentsBuilder.fromHttpUrl(GITHUB_SEARCH_API_URL)
+                    .queryParam("q", FILTER_QUERY)
+                    .queryParam("page", page)
+                    .queryParam("per_page", PAGE_SIZE);
 
         return githubApi.get(uriBuilder.toUriString(), GitHubSearchResponse.class);
     }

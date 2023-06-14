@@ -1,17 +1,17 @@
 package companieshouse.gov.uk.githubapi.service.mvn;
 
 import static companieshouse.gov.uk.githubapi.util.NameUtils.normaliseName;
+import static companieshouse.gov.uk.githubapi.util.StreamUtils.collectToMap;
 import static companieshouse.gov.uk.githubapi.util.XmlUtils.getNodeStream;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 @Component
@@ -31,8 +31,17 @@ public class PropertiesParseRule implements ParseRule {
 
         return getNodeStream(properties.getChildNodes())
             .filter(node -> node.getNodeName().toLowerCase().strip().endsWith(".version"))
-            .flatMap(node -> Map.of(normaliseName(node.getNodeName(), "."), node.getTextContent()).entrySet().stream())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (existing, replacement) -> existing));
+            .flatMap(this::toSingletonMap)
+            .collect(collectToMap());
+    }
+
+    private Stream<Entry<String, String>> toSingletonMap(final Node node) {
+        return Map.of(
+                normaliseName(node.getNodeName(), "."),
+                node.getTextContent()
+        )
+            .entrySet()
+            .stream();
     }
 
 }

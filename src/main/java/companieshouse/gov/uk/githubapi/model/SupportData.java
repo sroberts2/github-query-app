@@ -77,15 +77,31 @@ public class SupportData {
 
     @Override
     public String toString() {
-        return "SupportData{" +
-                "cycle='" + cycle + '\'' +
-                ", supportedJavaVersions='" + supportedJavaVersions + '\'' +
-                ", releaseDate='" + releaseDate + '\'' +
-                ", eol='" + eol + '\'' +
-                ", extendedSupport='" + extendedSupport + '\'' +
-                ", latest='" + latest + '\'' +
-                ", latestReleaseDate='" + latestReleaseDate + '\'' +
-                ", lts='" + lts + '\'' +
-                '}';
+        return "SupportData{"
+                + "cycle='"
+                + cycle
+                + '\'' 
+                + ", supportedJavaVersions='"
+                + supportedJavaVersions
+                + '\''
+                + ", releaseDate='"
+                + releaseDate
+                + '\''
+                + ", eol='"
+                + eol
+                + '\''
+                + ", extendedSupport='"
+                + extendedSupport
+                + '\''
+                + ", latest='"
+                + latest
+                + '\''
+                + ", latestReleaseDate='"
+                + latestReleaseDate
+                + '\''
+                + ", lts='"
+                + lts
+                + '\''
+                + '}';
     }
 }

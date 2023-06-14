@@ -1,5 +1,11 @@
 package companieshouse.gov.uk.githubapi.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import companieshouse.gov.uk.githubapi.model.GitHubAppData;
+import companieshouse.gov.uk.githubapi.scheduled.FetchGithubRepositories;
+import companieshouse.gov.uk.githubapi.service.AppDataService;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -13,12 +19,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import companieshouse.gov.uk.githubapi.model.GitHubAppData;
-import companieshouse.gov.uk.githubapi.scheduled.FetchGithubRepositories;
-import companieshouse.gov.uk.githubapi.service.AppDataService;
-
 @Controller
 @RequestMapping
 public class GitHubApiController {
@@ -29,12 +29,25 @@ public class GitHubApiController {
     private final FetchGithubRepositories fetchGithubRepositories;
 
 
+    /**
+     * Constructor for the GitHubApiController.
+     * @param appDataService appDataService to load GitHubAppData
+     * @param fetchGithubRepositories fetchGithubRepositories task to fetch GitHub repositories
+     */
     @Autowired
-    public GitHubApiController(final AppDataService appDataService, final FetchGithubRepositories fetchGithubRepositories) {
+    public GitHubApiController(
+            final AppDataService appDataService,
+            final FetchGithubRepositories fetchGithubRepositories
+    ) {
         this.appDataService = appDataService;
         this.fetchGithubRepositories = fetchGithubRepositories;
     }
 
+    /**
+     * Get '/' returning the index page with Github Application data on it.
+     * @param model model to add the app data to
+     * @return the index page
+     */
     @GetMapping("/")
     public String getGitHubAppData(Model model) {
         LOGGER.debug("Loading app data");
@@ -46,6 +59,11 @@ public class GitHubApiController {
     }
 
 
+    /**
+     * Get '/get-data' returning the repos page with GitHub repositories on it.
+     * @param model model to add the repos to
+     * @return the repos page
+     */
     @GetMapping("/get-data")
     public String getData(Model model)  {
         List<GitHubAppData> list = appDataService.loadAppData();
@@ -53,6 +71,11 @@ public class GitHubApiController {
         return "repos";
     }
 
+    /**
+     * Populate the database with the GitHub repositories.
+     * @return 200 response if successful, 503 if already in progress
+     * @throws JsonProcessingException if the JSON cannot be processed
+     */
     //TODO cron instead of endpoint
     @GetMapping("/populate-repo-data")
     public ResponseEntity<String> getGitHubApiResponse() throws JsonProcessingException {
