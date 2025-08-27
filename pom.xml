@@ -18,7 +18,7 @@
         <java.version>17</java.version>
         <spring.boot.version>3.0.6</spring.boot.version>
         <http.client.version>5.2.1</http.client.version>
-        <apache.commons-lang3.version>3.12.0</apache.commons-lang3.version>
+        <apache.commons-lang3.version>3.18.0</apache.commons-lang3.version>
 
         <!-- Test dependency versions -->
         <assertj.version>3.24.2</assertj.version>
